@@ -135,18 +135,7 @@ class _Brand extends StatelessWidget {
       'assets/svg/hawazen.svg',
       width: 40,
       height: 40,
-      fit: BoxFit.contain,
-      placeholderBuilder: (context) => const SizedBox(
-        width: 40,
-        height: 40,
-        child: Center(
-          child: SizedBox(
-            width: 16,
-            height: 16,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-        ),
-      ),
+      colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
     ); // Adjust color as needed
   }
 }
