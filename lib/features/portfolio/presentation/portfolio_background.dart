@@ -3,92 +3,63 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 
 class PortfolioBackground extends StatelessWidget {
-  const PortfolioBackground({super.key, required this.child});
+  const PortfolioBackground({
+    super.key,
+    required this.child,
+    required this.scrollOffset,
+  });
 
   final Widget child;
+  final double scrollOffset;
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        const _Gradient(),
-        const _Orbs(),
-        const Positioned.fill(child: _Grid()),
-        Positioned.fill(child: child),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final viewportHeight = constraints.maxHeight;
+        final shift = viewportHeight <= 0 ? 0.0 : scrollOffset % viewportHeight;
+        final paintHeight = viewportHeight <= 0
+            ? constraints.maxHeight
+            : viewportHeight * 2;
+
+        return Stack(
+          clipBehavior: Clip.hardEdge,
+          children: [
+            Positioned(
+              left: 0,
+              right: 0,
+              top: -shift,
+              height: paintHeight,
+              child: CustomPaint(painter: const _BackgroundPainter()),
+            ),
+            child,
+          ],
+        );
+      },
     );
   }
 }
 
-class _Gradient extends StatelessWidget {
-  const _Gradient();
+class _BackgroundPainter extends CustomPainter {
+  const _BackgroundPainter();
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: RadialGradient(
-          center: Alignment(-0.2, -0.6),
-          radius: 1.2,
-          colors: [AppTheme.bg, Color(0xFF07080B)],
-        ),
-      ),
-    );
-  }
-}
-
-class _Orbs extends StatelessWidget {
-  const _Orbs();
-
-  @override
-  Widget build(BuildContext context) {
-    final ring = Colors.white.withAlpha(16);
-    return IgnorePointer(
-      child: Stack(
-        children: [
-          Positioned(
-            top: -180,
-            right: -180,
-            child: _Circle(diameter: 520, color: ring),
-          ),
-          Positioned(
-            top: 260,
-            left: -220,
-            child: _Circle(diameter: 640, color: ring),
-          ),
-          Positioned(
-            bottom: -220,
-            right: -260,
-            child: _Circle(diameter: 760, color: ring),
-          ),
-          Positioned(
-            top: 120,
-            left: 40,
-            child: _Glow(diameter: 260, color: AppTheme.surface.withAlpha(36)),
-          ),
-          Positioned(
-            bottom: 120,
-            right: 60,
-            child: _Glow(diameter: 320, color: AppTheme.surface.withAlpha(28)),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Grid extends StatelessWidget {
-  const _Grid();
-
-  @override
-  Widget build(BuildContext context) {
-    return IgnorePointer(child: CustomPaint(painter: _GridPainter()));
-  }
-}
-
-class _GridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+
+    final bgPaint = Paint()
+      ..shader = const RadialGradient(
+        center: Alignment(-0.2, -0.6),
+        radius: 1.2,
+        colors: [AppTheme.bg, Color(0xFF07080B)],
+      ).createShader(rect);
+    canvas.drawRect(rect, bgPaint);
+
+    _paintOrbs(canvas, size);
+    _paintGrid(canvas, size);
+  }
+
+  void _paintGrid(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = Colors.white.withAlpha(10)
       ..strokeWidth = 1;
@@ -102,44 +73,68 @@ class _GridPainter extends CustomPainter {
     }
   }
 
+  void _paintOrbs(Canvas canvas, Size size) {
+    final ringPaint = Paint()
+      ..color = Colors.white.withAlpha(16)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+
+    _drawRing(
+      canvas: canvas,
+      center: Offset(size.width - 80, 80),
+      radius: 260,
+      paint: ringPaint,
+    );
+    _drawRing(
+      canvas: canvas,
+      center: const Offset(100, 580),
+      radius: 320,
+      paint: ringPaint,
+    );
+    _drawRing(
+      canvas: canvas,
+      center: Offset(size.width - 120, size.height - 160),
+      radius: 380,
+      paint: ringPaint,
+    );
+
+    _drawGlow(
+      canvas: canvas,
+      center: const Offset(170, 250),
+      radius: 130,
+      color: AppTheme.surface.withAlpha(36),
+    );
+    _drawGlow(
+      canvas: canvas,
+      center: Offset(size.width - 220, size.height - 280),
+      radius: 160,
+      color: AppTheme.surface.withAlpha(28),
+    );
+  }
+
+  void _drawRing({
+    required Canvas canvas,
+    required Offset center,
+    required double radius,
+    required Paint paint,
+  }) {
+    canvas.drawCircle(center, radius, paint);
+  }
+
+  void _drawGlow({
+    required Canvas canvas,
+    required Offset center,
+    required double radius,
+    required Color color,
+  }) {
+    final rect = Rect.fromCircle(center: center, radius: radius);
+    final paint = Paint()
+      ..shader = RadialGradient(
+        colors: [color, Colors.transparent],
+      ).createShader(rect);
+    canvas.drawCircle(center, radius, paint);
+  }
+
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class _Circle extends StatelessWidget {
-  const _Circle({required this.diameter, required this.color});
-
-  final double diameter;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: diameter,
-      height: diameter,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: color, width: 1),
-      ),
-    );
-  }
-}
-
-class _Glow extends StatelessWidget {
-  const _Glow({required this.diameter, required this.color});
-
-  final double diameter;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: diameter,
-      height: diameter,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: RadialGradient(colors: [color, Colors.transparent]),
-      ),
-    );
-  }
 }

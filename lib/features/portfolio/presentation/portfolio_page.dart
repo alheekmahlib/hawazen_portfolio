@@ -161,6 +161,8 @@ class _PortfolioPageState extends State<PortfolioPage> {
     final content = _contentController.content.value;
     if (content == null) return;
 
+    _portfolioScroll.setScrollOffset(_scrollController.offset);
+
     const threshold = 140.0;
     final candidates = <MapEntry<String, double>>[];
 

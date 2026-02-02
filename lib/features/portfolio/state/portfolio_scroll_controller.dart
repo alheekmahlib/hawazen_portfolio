@@ -5,6 +5,7 @@ class PortfolioScrollController extends GetxController {
   final Map<String, GlobalKey> _sectionKeys = <String, GlobalKey>{};
   ScrollController? _scrollController;
   final RxString activeSlug = ''.obs;
+  final RxDouble scrollOffset = 0.0.obs;
 
   void attachScrollController(ScrollController controller) {
     _scrollController = controller;
@@ -23,6 +24,11 @@ class PortfolioScrollController extends GetxController {
   void setActiveSlug(String slug) {
     if (activeSlug.value == slug) return;
     activeSlug.value = slug;
+  }
+
+  void setScrollOffset(double offset) {
+    if (scrollOffset.value == offset) return;
+    scrollOffset.value = offset;
   }
 
   bool scrollToTop({Duration duration = const Duration(milliseconds: 550)}) {
