@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/app_strings.dart';
 import '../../../core/l10n/locale_controller.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/glass_container.dart';
 import '../../content/state/content_controller.dart';
 import '../state/portfolio_scroll_controller.dart';
@@ -46,8 +47,9 @@ class PortfolioScaffold extends StatelessWidget {
                         ),
                         child: Row(
                           children: [
-                            const _Brand(),
                             const SizedBox(width: 12),
+                            const _Brand(),
+                            const SizedBox(width: 24),
                             Expanded(
                               child: SingleChildScrollView(
                                 scrollDirection: Axis.horizontal,
@@ -154,7 +156,7 @@ class _NavButton extends StatelessWidget {
       style: TextButton.styleFrom(
         foregroundColor: selected ? Colors.white : Colors.white70,
         backgroundColor: selected
-            ? Colors.white.withAlpha(28)
+            ? AppTheme.secondary.withAlpha(60)
             : Colors.white.withAlpha(10),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),

@@ -13,7 +13,7 @@ class PortfolioBackground extends StatelessWidget {
       children: [
         const _Gradient(),
         const _Orbs(),
-        const _Grid(),
+        const Positioned.fill(child: _Grid()),
         Positioned.fill(child: child),
       ],
     );
@@ -82,9 +82,7 @@ class _Grid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: Positioned.fill(child: CustomPaint(painter: _GridPainter())),
-    );
+    return IgnorePointer(child: CustomPaint(painter: _GridPainter()));
   }
 }
 
