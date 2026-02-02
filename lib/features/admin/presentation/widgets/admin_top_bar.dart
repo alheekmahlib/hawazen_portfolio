@@ -29,16 +29,16 @@ class AdminTopBar extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
-            Expanded(
-              child: TextField(
-                controller: urlController,
-                decoration: InputDecoration(
-                  labelText: AppStrings.tr(locale, 'admin.contentUrl'),
-                  border: const OutlineInputBorder(),
-                ),
-                onSubmitted: (_) => onSaveUrl(),
-              ),
-            ),
+            // Expanded(
+            //   child: TextField(
+            //     controller: urlController,
+            //     decoration: InputDecoration(
+            //       labelText: AppStrings.tr(locale, 'admin.contentUrl'),
+            //       border: const OutlineInputBorder(),
+            //     ),
+            //     onSubmitted: (_) => onSaveUrl(),
+            //   ),
+            // ),
             const SizedBox(width: 10),
             OutlinedButton.icon(
               onPressed: onSaveUrl,

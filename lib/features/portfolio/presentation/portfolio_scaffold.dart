@@ -100,13 +100,13 @@ class PortfolioScaffold extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 10),
-                            IconButton(
-                              tooltip: AppStrings.tr(locale, 'nav.admin'),
-                              onPressed: () => context.go('/admin'),
-                              icon: const Icon(
-                                Icons.admin_panel_settings_outlined,
-                              ),
-                            ),
+                            // IconButton(
+                            //   tooltip: AppStrings.tr(locale, 'nav.admin'),
+                            //   onPressed: () => context.go('/admin'),
+                            //   icon: const Icon(
+                            //     Icons.admin_panel_settings_outlined,
+                            //   ),
+                            // ),
                             _LocaleToggle(locale: locale),
                           ],
                         ),
