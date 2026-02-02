@@ -28,8 +28,10 @@ class PortfolioScaffold extends StatelessWidget {
       final isLoading = contentController.loading.value;
       final error = contentController.error.value;
       final activeSlug = scrollController.activeSlug.value;
+      final scrollOffset = scrollController.scrollOffset.value;
 
       return PortfolioBackground(
+        scrollOffset: scrollOffset,
         child: Scaffold(
           backgroundColor: Colors.transparent,
           body: SafeArea(
@@ -133,7 +135,18 @@ class _Brand extends StatelessWidget {
       'assets/svg/hawazen.svg',
       width: 40,
       height: 40,
-      colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
+      fit: BoxFit.contain,
+      placeholderBuilder: (context) => const SizedBox(
+        width: 40,
+        height: 40,
+        child: Center(
+          child: SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
+      ),
     ); // Adjust color as needed
   }
 }
