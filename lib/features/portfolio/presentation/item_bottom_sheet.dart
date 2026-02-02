@@ -344,6 +344,9 @@ class _GalleryStrip extends StatelessWidget {
 
         return StatefulBuilder(
           builder: (context, setState) {
+            final isRtl = Directionality.of(context) == TextDirection.rtl;
+            final prevIcon = Icons.chevron_left_rounded;
+            final nextIcon = Icons.chevron_right_rounded;
             return Dialog(
               insetPadding: const EdgeInsets.all(16),
               backgroundColor: Colors.black,
@@ -371,7 +374,8 @@ class _GalleryStrip extends StatelessWidget {
                     ),
                   ),
                   Positioned(
-                    left: 12,
+                    left: isRtl ? null : 12,
+                    right: isRtl ? 12 : null,
                     top: 0,
                     bottom: 0,
                     child: Center(
@@ -382,17 +386,14 @@ class _GalleryStrip extends StatelessWidget {
                                 curve: Curves.easeOut,
                               )
                             : null,
-                        icon: const Icon(
-                          Icons.chevron_left_rounded,
-                          color: Colors.white,
-                          size: 36,
-                        ),
+                        icon: Icon(prevIcon, color: Colors.white, size: 36),
                         tooltip: 'Previous',
                       ),
                     ),
                   ),
                   Positioned(
-                    right: 12,
+                    left: isRtl ? 12 : null,
+                    right: isRtl ? null : 12,
                     top: 0,
                     bottom: 0,
                     child: Center(
@@ -403,11 +404,7 @@ class _GalleryStrip extends StatelessWidget {
                                 curve: Curves.easeOut,
                               )
                             : null,
-                        icon: const Icon(
-                          Icons.chevron_right_rounded,
-                          color: Colors.white,
-                          size: 36,
-                        ),
+                        icon: Icon(nextIcon, color: Colors.white, size: 36),
                         tooltip: 'Next',
                       ),
                     ),

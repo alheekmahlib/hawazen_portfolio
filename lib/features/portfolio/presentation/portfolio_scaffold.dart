@@ -60,7 +60,10 @@ class PortfolioScaffold extends StatelessWidget {
                                     _NavButton(
                                       label: AppStrings.tr(locale, 'nav.home'),
                                       selected: activeSlug.isEmpty,
-                                      onTap: () => context.go('/'),
+                                      onTap: () {
+                                        scrollController.scrollToTop();
+                                        context.go('/');
+                                      },
                                     ),
                                     const SizedBox(width: 8),
                                     if (content != null)

@@ -119,85 +119,87 @@ class SectionItemCard extends StatelessWidget {
 
     final radius = BorderRadius.circular(26);
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: radius,
-      child: GlassContainer(
-        padding: EdgeInsets.zero,
+    return _HoverScale(
+      child: InkWell(
+        onTap: onTap,
         borderRadius: radius,
-        child: Stack(
-          children: [
-            if (mediaUrl != null && mediaUrl.isNotEmpty)
+        child: GlassContainer(
+          padding: EdgeInsets.zero,
+          borderRadius: radius,
+          child: Stack(
+            children: [
+              if (mediaUrl != null && mediaUrl.isNotEmpty)
+                Positioned.fill(
+                  child: ClipRRect(
+                    borderRadius: radius,
+                    child: Image.network(
+                      mediaUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                    ),
+                  ),
+                ),
               Positioned.fill(
-                child: ClipRRect(
-                  borderRadius: radius,
-                  child: Image.network(
-                    mediaUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: radius,
+                    gradient: LinearGradient(
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                      colors: [
+                        Colors.black.withAlpha(210),
+                        Colors.black.withAlpha(25),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  borderRadius: radius,
-                  gradient: LinearGradient(
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.topCenter,
-                    colors: [
-                      Colors.black.withAlpha(210),
-                      Colors.black.withAlpha(25),
+              Positioned(
+                left: 14,
+                right: 14,
+                bottom: 14,
+                child: GlassContainer(
+                  padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
+                  borderRadius: BorderRadius.circular(20),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.w800),
+                            ),
+                            if (subtitle != null && subtitle.trim().isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 6),
+                                child: Text(
+                                  _plain(subtitle),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: Colors.white70,
+                                        height: 1.4,
+                                      ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      const ArrowDot(),
                     ],
                   ),
                 ),
               ),
-            ),
-            Positioned(
-              left: 14,
-              right: 14,
-              bottom: 14,
-              child: GlassContainer(
-                padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
-                borderRadius: BorderRadius.circular(20),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.w800),
-                          ),
-                          if (subtitle != null && subtitle.trim().isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 6),
-                              child: Text(
-                                _plain(subtitle),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(
-                                      color: Colors.white70,
-                                      height: 1.4,
-                                    ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    const ArrowDot(),
-                  ],
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -252,6 +254,33 @@ class ArrowDot extends StatelessWidget {
         ],
       ),
       child: const Icon(Icons.arrow_forward_rounded, color: Colors.white),
+    );
+  }
+}
+
+class _HoverScale extends StatefulWidget {
+  const _HoverScale({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_HoverScale> createState() => _HoverScaleState();
+}
+
+class _HoverScaleState extends State<_HoverScale> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: AnimatedScale(
+        scale: _hovered ? 1.02 : 1.0,
+        duration: const Duration(milliseconds: 160),
+        curve: Curves.easeOut,
+        child: widget.child,
+      ),
     );
   }
 }
