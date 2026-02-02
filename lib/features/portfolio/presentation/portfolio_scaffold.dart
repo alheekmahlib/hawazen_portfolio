@@ -130,7 +130,7 @@ class _Brand extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SvgPicture.asset(
-      'svg/hawazen.svg',
+      'assets/svg/hawazen.svg',
       width: 40,
       height: 40,
       colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
