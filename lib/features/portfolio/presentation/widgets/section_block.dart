@@ -23,8 +23,9 @@ class SectionBlock extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        SizedBox(height: 24),
         GlassContainer(
-          padding: const EdgeInsets.all(18),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
           child: Row(
             children: [
               Expanded(

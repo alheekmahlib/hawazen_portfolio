@@ -211,6 +211,27 @@ class ItemBottomSheet extends StatelessWidget {
                   .map((e) => e.trim())
                   .where((e) => e.isNotEmpty)
                   .toList();
+        if (_isSkillsSection(section.slug)) {
+          final textStyle = Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: Colors.white70, height: 1.7);
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (final t in tags)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('•  ', style: textStyle),
+                      Expanded(child: Text(t, style: textStyle)),
+                    ],
+                  ),
+                ),
+            ],
+          );
+        }
         return Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -240,15 +261,22 @@ class ItemBottomSheet extends StatelessWidget {
     return _asLocalizedOrString(def, value);
   }
 
+  bool _isSkillsSection(String slug) {
+    final v = slug.toLowerCase();
+    return v.contains('skills');
+  }
+
   String _asLocalizedOrString(FieldDefinition def, Object? value) {
-    if (!def.localized) return value?.toString() ?? '';
+    if (!def.localized) {
+      return (value?.toString() ?? '').replaceAll(r'\n', '\n');
+    }
     if (value is Map) {
       final map = value
           .map((k, v) => MapEntry(k.toString(), v?.toString() ?? ''))
           .cast<String, String>();
-      return L10nText(map).resolve(localeCode);
+      return L10nText(map).resolve(localeCode).replaceAll(r'\n', '\n');
     }
-    return value?.toString() ?? '';
+    return (value?.toString() ?? '').replaceAll(r'\n', '\n');
   }
 
   String? _fieldString(String key) {

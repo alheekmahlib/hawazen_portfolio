@@ -229,7 +229,16 @@ class _PortfolioPageState extends State<PortfolioPage> {
         }
 
         final viewModel = PortfolioViewModel.from(content, locale);
-        final sections = viewModel.sections;
+        const heroOnlySlugs = {
+          'profile-summary',
+          'technical-skills',
+          'design-skills',
+          'education',
+        };
+        final heroSections = viewModel.sections;
+        final sections = viewModel.sections
+            .where((s) => !heroOnlySlugs.contains(s.slug))
+            .toList();
 
         return SingleChildScrollView(
           controller: _scrollController,
@@ -246,7 +255,7 @@ class _PortfolioPageState extends State<PortfolioPage> {
                     subtitle: viewModel.subtitle,
                     bio: viewModel.bio,
                     localeCode: locale.languageCode,
-                    sections: sections,
+                    sections: heroSections,
                   ),
                   const SizedBox(height: 18),
                   for (final section in sections) ...[
@@ -259,6 +268,7 @@ class _PortfolioPageState extends State<PortfolioPage> {
                     ),
                     const SizedBox(height: 18),
                   ],
+                  const SizedBox(height: 18),
                   ContactSection(key: _keyForContact(), locale: locale),
                   const SizedBox(height: 18),
                   FooterSection(locale: locale, sections: sections),

@@ -35,44 +35,46 @@ class FooterSection extends StatelessWidget {
         ? '© $year $name — جميع الحقوق محفوظة'
         : '© $year $name — All rights reserved';
     final builtWith = locale.languageCode == 'ar'
-        ? 'مبني بـ Flutter • محتوى مُدار عبر JSON'
-        : 'Built with Flutter • Content managed via JSON';
+        ? 'مبني بـ Flutter •'
+        : 'Built with Flutter •';
 
-    final about = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          name,
-          style: Theme.of(
-            context,
-          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-        ),
-        const SizedBox(height: 6),
-        if (role.isNotEmpty)
+    final about = SelectionArea(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           Text(
-            role,
+            name,
             style: Theme.of(
               context,
-            ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
           ),
-        if (subtitle.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Text(
-              subtitle,
+          const SizedBox(height: 6),
+          if (role.isNotEmpty)
+            Text(
+              role,
               style: Theme.of(
                 context,
-              ).textTheme.bodySmall?.copyWith(color: Colors.white60),
+              ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
             ),
+          if (subtitle.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                subtitle,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.white60),
+              ),
+            ),
+          const SizedBox(height: 12),
+          Text(
+            builtWith,
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: Colors.white60),
           ),
-        const SizedBox(height: 12),
-        Text(
-          builtWith,
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(color: Colors.white60),
-        ),
-      ],
+        ],
+      ),
     );
 
     final links = Column(

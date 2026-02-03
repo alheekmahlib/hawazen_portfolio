@@ -23,38 +23,40 @@ class ContactSection extends StatelessWidget {
 
     return GlassContainer(
       padding: const EdgeInsets.all(18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            AppStrings.tr(locale, 'nav.contact'),
-            style: Theme.of(
-              context,
-            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 12),
-          if (c.email != null) ContactRow(label: 'Email', value: c.email!),
-          if (c.phone != null) ContactRow(label: 'Phone', value: c.phone!),
-          const SizedBox(height: 14),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [
-              if (c.email != null)
-                OutlinedButton.icon(
-                  onPressed: () => _launch('mailto:${c.email}'),
-                  icon: const Icon(Icons.mail_outline),
-                  label: const Text('Email'),
-                ),
-              if (c.whatsapp != null)
-                OutlinedButton.icon(
-                  onPressed: () => _launch(c.whatsapp!),
-                  icon: const Icon(Icons.chat_bubble_outline),
-                  label: const Text('WhatsApp'),
-                ),
-            ],
-          ),
-        ],
+      child: SelectionArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              AppStrings.tr(locale, 'nav.contact'),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 12),
+            if (c.email != null) ContactRow(label: 'Email', value: c.email!),
+            if (c.phone != null) ContactRow(label: 'Phone', value: c.phone!),
+            const SizedBox(height: 14),
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                if (c.email != null)
+                  OutlinedButton.icon(
+                    onPressed: () => _launch('mailto:${c.email}'),
+                    icon: const Icon(Icons.mail_outline),
+                    label: const Text('Email'),
+                  ),
+                if (c.whatsapp != null)
+                  OutlinedButton.icon(
+                    onPressed: () => _launch(c.whatsapp!),
+                    icon: const Icon(Icons.chat_bubble_outline),
+                    label: const Text('WhatsApp'),
+                  ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

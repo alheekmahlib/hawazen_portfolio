@@ -29,6 +29,12 @@ class PortfolioScaffold extends StatelessWidget {
       final error = contentController.error.value;
       final activeSlug = scrollController.activeSlug.value;
       final scrollOffset = scrollController.scrollOffset.value;
+      const heroOnlySlugs = {
+        'profile-summary',
+        'technical-skills',
+        'design-skills',
+        'education',
+      };
 
       return PortfolioBackground(
         scrollOffset: scrollOffset,
@@ -68,7 +74,11 @@ class PortfolioScaffold extends StatelessWidget {
                                     const SizedBox(width: 8),
                                     if (content != null)
                                       ...content.sections
-                                          .where((s) => s.enabled)
+                                          .where(
+                                            (s) =>
+                                                s.enabled &&
+                                                !heroOnlySlugs.contains(s.slug),
+                                          )
                                           .expand((s) sync* {
                                             yield _NavButton(
                                               label: s.title.resolve(

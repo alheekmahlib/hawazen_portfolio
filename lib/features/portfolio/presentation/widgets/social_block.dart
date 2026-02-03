@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../core/l10n/locale_controller.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../content/state/content_controller.dart';
 
@@ -11,6 +12,10 @@ class SocialBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final contentController = Get.find<ContentController>();
+    final LocaleController localeController = Get.find<LocaleController>();
+    final content = contentController.content.value;
+    final c = content!.site.contact;
+    final locale = localeController.locale.value;
 
     return Obx(() {
       final content = contentController.content.value;
@@ -22,12 +27,12 @@ class SocialBlock extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Links',
+              locale.languageCode == 'ar' ? 'تواصل' : 'Connect',
               style: Theme.of(
                 context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             Wrap(
               spacing: 10,
               runSpacing: 10,
@@ -37,6 +42,18 @@ class SocialBlock extends StatelessWidget {
                     onPressed: () => _launch(s.url),
                     icon: const Icon(Icons.open_in_new),
                     label: Text(s.label),
+                  ),
+                if (c.email != null)
+                  OutlinedButton.icon(
+                    onPressed: () => _launch('mailto:${c.email}'),
+                    icon: const Icon(Icons.mail_outline),
+                    label: const Text('Email'),
+                  ),
+                if (c.whatsapp != null)
+                  OutlinedButton.icon(
+                    onPressed: () => _launch(c.whatsapp!),
+                    icon: const Icon(Icons.chat_bubble_outline),
+                    label: const Text('WhatsApp'),
                   ),
               ],
             ),
