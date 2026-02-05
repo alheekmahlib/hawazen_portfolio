@@ -23,6 +23,7 @@ class AdminSectionEditor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    _normalizeStoreLinksOptional();
     final keys = section.fieldDefinitions.map((e) => e.key).toList();
     final imageKeys = section.fieldDefinitions
         .where((d) => d.type == FieldType.image)
@@ -184,5 +185,30 @@ class AdminSectionEditor extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _normalizeStoreLinksOptional() {
+    final needsUpdate = section.fieldDefinitions.any(
+      (d) => _isStoreLinkKey(d.key) && d.required,
+    );
+    if (!needsUpdate) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final defs = section.fieldDefinitions
+          .map((d) => _isStoreLinkKey(d.key) ? d.copyWith(required: false) : d)
+          .toList();
+      controller.upsertSection(section.copyWith(fieldDefinitions: defs));
+    });
+  }
+
+  bool _isStoreLinkKey(String key) {
+    final v = key.toLowerCase();
+    return v == 'ios' ||
+        v == 'android' ||
+        v == 'appstore' ||
+        v == 'playstore' ||
+        v == 'googleplay' ||
+        v == 'app_store' ||
+        v == 'play_store';
   }
 }

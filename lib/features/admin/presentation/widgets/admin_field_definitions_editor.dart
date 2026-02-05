@@ -176,6 +176,25 @@ class AdminFieldDefinitionsEditor extends StatelessWidget {
           children: [
             OutlinedButton.icon(
               onPressed: () => _addStoreLink(
+                key: 'appstore',
+                label: const L10nText({'en': 'App Store', 'ar': 'App Store'}),
+              ),
+              icon: const Icon(Icons.add_link),
+              label: Text(AppStrings.tr(locale, 'admin.addAppStoreField')),
+            ),
+            OutlinedButton.icon(
+              onPressed: () => _addStoreLink(
+                key: 'playstore',
+                label: const L10nText({
+                  'en': 'Google Play',
+                  'ar': 'Google Play',
+                }),
+              ),
+              icon: const Icon(Icons.add_link),
+              label: Text(AppStrings.tr(locale, 'admin.addPlayStoreField')),
+            ),
+            OutlinedButton.icon(
+              onPressed: () => _addStoreLink(
                 key: 'appgallery',
                 label: const L10nText({'en': 'AppGallery', 'ar': 'AppGallery'}),
               ),

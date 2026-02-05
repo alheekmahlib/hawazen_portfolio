@@ -41,6 +41,8 @@ class AppStrings {
       'admin.actionFields': 'Action link fields',
       'admin.addAppGalleryField': 'Add AppGallery link',
       'admin.addMacAppStoreField': 'Add Mac App Store link',
+      'admin.addAppStoreField': 'Add App Store link',
+      'admin.addPlayStoreField': 'Add Google Play link',
       'errors.notFound': 'Not found',
     },
     'ar': {
@@ -79,6 +81,8 @@ class AppStrings {
       'admin.actionFields': 'حقول الروابط',
       'admin.addAppGalleryField': 'إضافة رابط AppGallery',
       'admin.addMacAppStoreField': 'إضافة رابط Mac App Store',
+      'admin.addAppStoreField': 'إضافة رابط App Store',
+      'admin.addPlayStoreField': 'إضافة رابط Google Play',
       'errors.notFound': 'غير موجود',
     },
   };
