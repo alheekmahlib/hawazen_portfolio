@@ -46,6 +46,10 @@ dependencies:
   photo_view: ^0.15.0
   shared_preferences: ^2.5.4
   url_launcher: ^6.3.2
+  drawing_animation:
+    git:
+      ref: master
+      url: https://github.com/alheekmahlib/drawing_animation.git
 
 dev_dependencies:
 

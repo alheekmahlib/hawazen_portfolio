@@ -169,6 +169,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.3"
+  drawing_animation:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: master
+      resolved-ref: fa61269d1c9a8ded4accd82699b0140652c911a7
+      url: "https://github.com/alheekmahlib/drawing_animation.git"
+    source: git
+    version: "1.0.1"
   fake_async:
     dependency: transitive
     description:
