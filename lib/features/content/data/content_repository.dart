@@ -52,18 +52,22 @@ class ContentRepository {
     }
 
     try {
-      final response = await http.get(Uri.parse(url));
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        await prefs.setString(_contentCacheKey, response.body);
-        await prefs.setString(_contentCacheUrlKey, url);
-        final decoded = jsonDecode(response.body);
-        if (decoded is Map<String, Object?>) {
-          return PortfolioContent.fromJson(decoded);
+      final content = await _fetchContent(url);
+      await _cacheContent(content, url, prefs);
+      return content;
+    } catch (_) {
+      // Try fallback URL (GitLab) when primary (GitHub) is unreachable.
+      final fallback = AppConfig.fallbackContentUrl;
+      if (fallback.isNotEmpty && url != fallback) {
+        try {
+          final content = await _fetchContent(fallback);
+          await _cacheContent(content, fallback, prefs);
+          return content;
+        } catch (e2) {
+          throw StateError('Failed to load content from both GitHub and GitLab: ${e2.toString()}');
         }
       }
-      throw StateError('Failed to load content: HTTP ${response.statusCode}');
-    } catch (e) {
-      throw StateError('Failed to load content: ${e.toString()}');
+      rethrow;
     }
   }
 
@@ -75,5 +79,26 @@ class ContentRepository {
     await prefs.setString(_contentCacheKey, encoded);
     final url = await getContentUrl();
     await prefs.setString(_contentCacheUrlKey, url ?? '');
+  }
+
+  Future<PortfolioContent> _fetchContent(String url) async {
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final decoded = jsonDecode(response.body);
+      if (decoded is Map<String, Object?>) {
+        return PortfolioContent.fromJson(decoded);
+      }
+    }
+    throw StateError('Failed to load content: HTTP ${response.statusCode}');
+  }
+
+  Future<void> _cacheContent(
+    PortfolioContent content,
+    String url,
+    SharedPreferences prefs,
+  ) async {
+    final encoded = const JsonEncoder.withIndent('  ').convert(content.toJson());
+    await prefs.setString(_contentCacheKey, encoded);
+    await prefs.setString(_contentCacheUrlKey, url);
   }
 }
