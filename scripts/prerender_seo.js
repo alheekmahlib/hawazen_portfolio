@@ -294,8 +294,8 @@ async function main() {
 
   // Generate sitemap.xml
   const sitemapUrls = routes.map((r) => {
-    const fullUrl = SITE_ORIGIN + joinUrl(BASE_HREF, r.path);
-    return `  <url>\n    <loc>${escapeHtml(fullUrl)}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>${r.path === '/' ? '1.0' : r.path.endsWith('/') && r.path.split('/').length === 3 ? '0.8' : '0.6'}</priority>\n  </url>`;
+    const fullUrl = SITE_ORIGIN + joinUrl(BASE_HREF, r.path) + '/';
+    return `  <url>\n    <loc>${escapeHtml(fullUrl)}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>${r.path === '/' ? '1.0' : r.path.split('/').filter(Boolean).length === 1 ? '0.8' : '0.6'}</priority>\n  </url>`;
   });
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
