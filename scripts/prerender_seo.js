@@ -21,7 +21,7 @@ const CONTENT_URL =
   'https://raw.githubusercontent.com/alheekmahlib/data/main/websites/hawazen_portfolio/content.json';
 const FALLBACK_URL =
   'https://gitlab.com/haozo89/data/-/raw/main/websites/hawazen_portfolio/content.json';
-const SITE_ORIGIN = 'https://hawazenmahmood.github.io'; // update if custom domain
+const SITE_ORIGIN = 'https://alheekmahlib.github.io';
 
 function joinUrl(base, ...segments) {
   // Normalize: ensure single slashes, no trailing double slashes
@@ -120,6 +120,8 @@ function buildHtml({ title, description, canonicalPath, ogImage, jsonLd, origina
 <html>
 <head>
   <base href="${BASE_HREF}">
+  <!-- Google Search Console verification -->
+  <meta name="google-site-verification" content="OIn9l5KsNpj5G2Fulyl_ZjVaXNXbBsZl2HdPzXZc1YM" />
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">${metaTags}${jsonLdBlock}
