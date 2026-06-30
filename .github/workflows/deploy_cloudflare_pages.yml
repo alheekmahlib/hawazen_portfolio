@@ -1,0 +1,46 @@
+name: Deploy Flutter Web to Cloudflare Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudflare-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build web (root base-href for custom domain)
+        run: flutter build web --release --pwa-strategy=none --base-href "/"
+
+      - name: Pre-render SEO pages
+        run: node scripts/prerender_seo.js build/web "/"
+        env:
+          SITE_ORIGIN: ${{ secrets.SITE_ORIGIN }}
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy build/web --project-name=hawazen-portfolio

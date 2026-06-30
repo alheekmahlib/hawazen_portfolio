@@ -21,7 +21,8 @@ const CONTENT_URL =
   'https://raw.githubusercontent.com/alheekmahlib/data/main/websites/hawazen_portfolio/content.json';
 const FALLBACK_URL =
   'https://gitlab.com/haozo89/data/-/raw/main/websites/hawazen_portfolio/content.json';
-const SITE_ORIGIN = 'https://alheekmahlib.github.io';
+const SITE_ORIGIN =
+  process.env.SITE_ORIGIN || 'https://alheekmahlib.github.io';
 
 function joinUrl(base, ...segments) {
   // Normalize: ensure single slashes, no trailing double slashes
