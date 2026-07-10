@@ -147,6 +147,7 @@ function buildHtml({ title, description, canonicalPath, ogImage, jsonLd, origina
 <head>
   <base href="${BASE_HREF}">
   <!-- Google Search Console verification -->
+  <meta name="google-site-verification" content="90SjwhWwQVvPPQbxKXGoUgQT9CvCQCSeVKX3ANZQHkY" />
   <meta name="google-site-verification" content="OIn9l5KsNpj5G2Fulyl_ZjVaXNXbBsZl2HdPzXZc1YM" />
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
