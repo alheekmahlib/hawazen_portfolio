@@ -38,22 +38,43 @@ class SocialBlock extends StatelessWidget {
               runSpacing: 10,
               children: [
                 for (final s in content.site.social)
-                  OutlinedButton.icon(
-                    onPressed: () => _launch(s.url),
-                    icon: const Icon(Icons.open_in_new),
-                    label: Text(s.label),
+                  Tooltip(
+                    message: s.label,
+                    child: Semantics(
+                      link: true,
+                      label: '${s.label} — opens in a new tab',
+                      child: OutlinedButton.icon(
+                        onPressed: () => _launch(s.url),
+                        icon: const Icon(Icons.open_in_new),
+                        label: Text(s.label),
+                      ),
+                    ),
                   ),
                 if (c.email != null)
-                  OutlinedButton.icon(
-                    onPressed: () => _launch('mailto:${c.email}'),
-                    icon: const Icon(Icons.mail_outline),
-                    label: const Text('Email'),
+                  Tooltip(
+                    message: 'Email',
+                    child: Semantics(
+                      link: true,
+                      label: 'Email — opens mail client',
+                      child: OutlinedButton.icon(
+                        onPressed: () => _launch('mailto:${c.email}'),
+                        icon: const Icon(Icons.mail_outline),
+                        label: const Text('Email'),
+                      ),
+                    ),
                   ),
                 if (c.whatsapp != null)
-                  OutlinedButton.icon(
-                    onPressed: () => _launch(c.whatsapp!),
-                    icon: const Icon(Icons.chat_bubble_outline),
-                    label: const Text('WhatsApp'),
+                  Tooltip(
+                    message: 'WhatsApp',
+                    child: Semantics(
+                      link: true,
+                      label: 'WhatsApp — opens in a new tab',
+                      child: OutlinedButton.icon(
+                        onPressed: () => _launch(c.whatsapp!),
+                        icon: const Icon(Icons.chat_bubble_outline),
+                        label: const Text('WhatsApp'),
+                      ),
+                    ),
                   ),
               ],
             ),

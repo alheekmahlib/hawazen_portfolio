@@ -21,8 +21,11 @@ const CONTENT_URL =
   'https://raw.githubusercontent.com/alheekmahlib/data/main/websites/hawazen_portfolio/content.json';
 const FALLBACK_URL =
   'https://gitlab.com/haozo89/data/-/raw/main/websites/hawazen_portfolio/content.json';
+// Canonical origin for the site. The default is the custom domain; the env
+// var (if set and non-empty) still takes precedence for flexibility.
 const SITE_ORIGIN =
-  process.env.SITE_ORIGIN || 'https://alheekmahlib.github.io';
+  (process.env.SITE_ORIGIN && process.env.SITE_ORIGIN.trim()) ||
+  'https://hawazen.vexaltech.dev';
 
 function joinUrl(base, ...segments) {
   // Normalize: ensure single slashes, no trailing double slashes
@@ -33,6 +36,19 @@ function joinUrl(base, ...segments) {
   }
   return result || '/';
 }
+
+// Absolute canonical URL for a route path, always with a single trailing slash.
+// This single source of truth is reused for <link rel="canonical">, og:url,
+// hreflang, sitemap <loc>, and JSON-LD url — so they can never drift apart.
+function canonicalUrl(path) {
+  const joined = joinUrl(BASE_HREF, path); // e.g. '/' or '/apps/the-holy-quran'
+  const noSlash = joined.replace(/\/+$/, '') || ''; // strip trailing slash
+  return SITE_ORIGIN + (noSlash || '') + '/';
+}
+
+// Default social share image used when a route has no banner of its own.
+// Keep this file at web/og-image.png (recommended 1200×630).
+const DEFAULT_OG_IMAGE = joinUrl(SITE_ORIGIN, BASE_HREF, 'og-image.png');
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -76,8 +92,8 @@ function localized(obj, locale) {
 // ── Template ────────────────────────────────────────────────────────────────
 
 function buildHtml({ title, description, canonicalPath, ogImage, jsonLd, originalHtml }) {
-  const fullUrl = SITE_ORIGIN + joinUrl(BASE_HREF, canonicalPath);
-  const og = ogImage || '';
+  const fullUrl = canonicalUrl(canonicalPath);
+  const og = ogImage || DEFAULT_OG_IMAGE;
 
   // Extract the body content and style from original
   const bodyStyleMatch = originalHtml.match(/<body([^>]*)>/);
@@ -97,28 +113,37 @@ function buildHtml({ title, description, canonicalPath, ogImage, jsonLd, origina
   <meta property="og:title" content="${escapeHtml(title)}">
   <meta property="og:description" content="${escapeHtml(description)}">
   <meta property="og:url" content="${escapeHtml(fullUrl)}">
-  ${og ? `<meta property="og:image" content="${escapeHtml(og)}">` : ''}
+  <meta property="og:image" content="${escapeHtml(og)}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
   <meta property="og:site_name" content="Hawazen Mahmood">
 
   <!-- Twitter Card -->
-  <meta name="twitter:card" content="${og ? 'summary_large_image' : 'summary'}">
+  <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${escapeHtml(title)}">
   <meta name="twitter:description" content="${escapeHtml(description)}">
-  ${og ? `<meta name="twitter:image" content="${escapeHtml(og)}">` : ''}
+  <meta name="twitter:image" content="${escapeHtml(og)}">
 
-  <!-- Alternates -->
+  <!-- Theme color (browser chrome on mobile) -->
+  <meta name="theme-color" content="#023047">
+
+  <!-- Alternates (fullUrl ends with '/', so '?lang=' appends cleanly) -->
   <link rel="alternate" hreflang="en" href="${escapeHtml(fullUrl)}?lang=en">
   <link rel="alternate" hreflang="ar" href="${escapeHtml(fullUrl)}?lang=ar">
   <link rel="alternate" hreflang="x-default" href="${escapeHtml(fullUrl)}">
 `;
 
-  // Build JSON-LD
-  const jsonLdBlock = jsonLd
-    ? `\n  <script type="application/ld+json">\n${JSON.stringify(jsonLd, null, 2)}\n  </script>`
-    : '';
+  // Build JSON-LD — accept a single object or an array of objects.
+  const ldItems = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
+  const jsonLdBlock = ldItems
+    .map(
+      (ld) =>
+        `\n  <script type="application/ld+json">\n${JSON.stringify(ld, null, 2)}\n  </script>`,
+    )
+    .join('');
 
   return `<!DOCTYPE html>
-<html>
+<html lang="en" dir="ltr">
 <head>
   <base href="${BASE_HREF}">
   <!-- Google Search Console verification -->
@@ -149,17 +174,25 @@ function buildHtml({ title, description, canonicalPath, ogImage, jsonLd, origina
 
 function buildPersonLd(data) {
   const site = data.site || {};
-  return {
+  const person = {
     '@context': 'https://schema.org',
     '@type': 'Person',
     name: localized(site.name, 'en'),
     jobTitle: localized(site.role, 'en'),
     description: localized(site.bio, 'en'),
-    url: SITE_ORIGIN + joinUrl(BASE_HREF),
+    url: canonicalUrl('/'),
+    image: DEFAULT_OG_IMAGE,
     email: site.contact?.email || '',
     telephone: site.contact?.phone || '',
-    sameAs: (site.social || []).map((s) => s.url),
+    sameAs: (site.social || []).map((s) => s.url).filter(Boolean),
   };
+  // Drop empty optional fields so we don't emit "" values.
+  Object.keys(person).forEach((k) => {
+    if (person[k] === '' || (Array.isArray(person[k]) && person[k].length === 0)) {
+      delete person[k];
+    }
+  });
+  return person;
 }
 
 function buildWebPageLd(title, description, url) {
@@ -172,21 +205,37 @@ function buildWebPageLd(title, description, url) {
   };
 }
 
+// Breadcrumbs: Home > Section (and optionally Section > Item on item pages).
+function buildBreadcrumbLd(trail) {
+  const itemList = trail.map((entry, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: entry.name,
+    item: entry.url,
+  }));
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: itemList,
+  };
+}
+
 function buildSoftwareAppLd(item, section) {
   const fields = item.fields || {};
-  return {
+  const app = {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
     name: localized(fields.name, 'en'),
     description: localized(fields.description, 'en'),
     applicationCategory: section.slug === 'apps' ? 'MobileApplication' : 'DeveloperApplication',
-    image: fields.banner || '',
+    image: fields.banner || DEFAULT_OG_IMAGE,
     offers: {
       '@type': 'Offer',
       price: '0',
       priceCurrency: 'USD',
     },
   };
+  return app;
 }
 
 function generateRoutes(data) {
@@ -214,7 +263,13 @@ function generateRoutes(data) {
       path: `/${section.slug}/`,
       title: `${sectionTitle} – ${localized(site.name, 'en')}`,
       description: sectionDesc,
-      jsonLd: buildWebPageLd(sectionTitle, sectionDesc, SITE_ORIGIN + joinUrl(BASE_HREF, section.slug)),
+      jsonLd: [
+        buildWebPageLd(sectionTitle, sectionDesc, canonicalUrl(`/${section.slug}/`)),
+        buildBreadcrumbLd([
+          { name: localized(site.name, 'en'), url: canonicalUrl('/') },
+          { name: sectionTitle, url: canonicalUrl(`/${section.slug}/`) },
+        ]),
+      ],
       ogImage: '',
     });
 
@@ -225,12 +280,20 @@ function generateRoutes(data) {
       const itemName = localized(fields.name, 'en');
       const itemDesc = localized(fields.description, 'en');
       const banner = fields.banner || '';
+      const itemPath = `/${section.slug}/${item.id}/`;
 
       routes.push({
-        path: `/${section.slug}/${item.id}/`,
+        path: itemPath,
         title: `${itemName} – ${localized(site.name, 'en')}`,
         description: itemDesc,
-        jsonLd: buildSoftwareAppLd(item, section),
+        jsonLd: [
+          buildSoftwareAppLd(item, section),
+          buildBreadcrumbLd([
+            { name: localized(site.name, 'en'), url: canonicalUrl('/') },
+            { name: sectionTitle, url: canonicalUrl(`/${section.slug}/`) },
+            { name: itemName, url: canonicalUrl(itemPath) },
+          ]),
+        ],
         ogImage: banner,
       });
     }
@@ -293,9 +356,9 @@ async function main() {
     console.log(`   ✓ ${route.path} → ${route.title}`);
   }
 
-  // Generate sitemap.xml
+  // Generate sitemap.xml — reuse canonicalUrl() so <loc> matches canonical/og:url.
   const sitemapUrls = routes.map((r) => {
-    const fullUrl = SITE_ORIGIN + joinUrl(BASE_HREF, r.path) + '/';
+    const fullUrl = canonicalUrl(r.path);
     return `  <url>\n    <loc>${escapeHtml(fullUrl)}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>${r.path === '/' ? '1.0' : r.path.split('/').filter(Boolean).length === 1 ? '0.8' : '0.6'}</priority>\n  </url>`;
   });
 
@@ -311,7 +374,7 @@ ${sitemapUrls.join('\n')}
   const robots = `User-agent: *
 Allow: /
 
-Sitemap: ${SITE_ORIGIN + joinUrl(BASE_HREF, 'sitemap.xml')}
+Sitemap: ${joinUrl(SITE_ORIGIN, BASE_HREF, 'sitemap.xml')}
 `;
   fs.writeFileSync(path.join(BUILD_DIR, 'robots.txt'), robots, 'utf8');
   console.log('🤖 robots.txt generated');

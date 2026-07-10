@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" dir="ltr">
 <head>
   <!--
     If you are serving your web app in a path other than the root, change the
@@ -21,18 +21,36 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hawazen Portfolio</title>
+  <meta name="description" content="Hawazen Mahmood — Flutter developer building well-structured, maintainable apps with modern, user-friendly interfaces.">
+
+  <!-- Theme color (mobile browser chrome) -->
+  <meta name="theme-color" content="#023047">
+
+  <!-- Fallback Open Graph / Twitter tags. The SEO pre-renderer overrides
+       these per route with route-specific title/description/image; they exist
+       here so a non-prerendered build still shares sensibly. -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Hawazen Mahmood">
+  <meta property="og:title" content="Hawazen Portfolio">
+  <meta property="og:description" content="Flutter developer building well-structured, maintainable apps with modern, user-friendly interfaces.">
+  <meta property="og:image" content="og-image.png">
+  <meta property="og:url" content="https://hawazen.vexaltech.dev/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Hawazen Portfolio">
+  <meta name="twitter:description" content="Flutter developer building well-structured, maintainable apps with modern, user-friendly interfaces.">
+  <meta name="twitter:image" content="og-image.png">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="hawazen_portfolio">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png?v=2026-02-02">
+  <meta name="apple-mobile-web-app-title" content="Hawazen Mahmood">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/Icon-192.png">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png?v=2026-02-02"/>
+  <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>hawazen_portfolio</title>
   <link rel="manifest" href="manifest.json">
 
   <style>
@@ -62,6 +80,26 @@
         if(loadingIndicator)loadingIndicator.remove()
       }, 100);
     }
+  </script>
+  <!--
+    Accessibility fix: Flutter injects maximum-scale=1.0 / user-scalable=no at
+    runtime, which blocks pinch-to-zoom (a WCAG issue and a negative Lighthouse
+    / SEO signal). Restore zoom as soon as the viewport meta appears.
+  -->
+  <script>
+    (function () {
+      function allowZoom() {
+        var m = document.querySelector('meta[name="viewport"]');
+        if (m) {
+          m.setAttribute('content', 'width=device-width, initial-scale=1.0');
+        }
+      }
+      // Run once now and again after the DOM is ready (Flutter rewrites it).
+      allowZoom();
+      document.addEventListener('DOMContentLoaded', allowZoom);
+      var obs = new MutationObserver(allowZoom);
+      obs.observe(document.documentElement, { childList: true, subtree: true });
+    })();
   </script>
 </body>
 </html>

@@ -36,11 +36,15 @@ class HeroSection extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            GradientText(
-              text: name,
-              style: Theme.of(
-                context,
-              ).textTheme.displayMedium?.copyWith(height: 1.05),
+            // The person's name acts as the page's primary heading (h1).
+            Semantics(
+              header: true,
+              child: GradientText(
+                text: name,
+                style: Theme.of(
+                  context,
+                ).textTheme.displayMedium?.copyWith(height: 1.05),
+              ),
             ),
             const SizedBox(height: 12),
             Text(

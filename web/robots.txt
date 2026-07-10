@@ -1,0 +1,7 @@
+# Committed fallback. The SEO pre-renderer (scripts/prerender_seo.js)
+# overwrites this at build time with a version that points to the generated
+# sitemap, so this file only matters if the pre-renderer is ever skipped.
+User-agent: *
+Allow: /
+
+Sitemap: https://hawazen.vexaltech.dev/sitemap.xml

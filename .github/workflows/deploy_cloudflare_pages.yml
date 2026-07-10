@@ -36,7 +36,10 @@ jobs:
       - name: Pre-render SEO pages
         run: node scripts/prerender_seo.js build/web "/"
         env:
-          SITE_ORIGIN: ${{ secrets.SITE_ORIGIN }}
+          # Canonical origin for every URL the pre-renderer emits (canonical,
+          # og:url, hreflang, sitemap, robots). Hard-coded so a missing/mis-set
+          # secret can never point SEO at the wrong domain again.
+          SITE_ORIGIN: "https://hawazen.vexaltech.dev"
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3

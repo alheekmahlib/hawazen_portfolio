@@ -29,10 +29,13 @@ class SectionBlock extends StatelessWidget {
           child: Row(
             children: [
               Expanded(
-                child: Text(
-                  section.title.resolve(localeCode),
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
+                child: Semantics(
+                  header: true,
+                  child: Text(
+                    section.title.resolve(localeCode),
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
               ),
@@ -121,25 +124,34 @@ class SectionItemCard extends StatelessWidget {
     final radius = BorderRadius.circular(26);
 
     return _HoverScale(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: radius,
-        child: GlassContainer(
-          padding: EdgeInsets.zero,
+      child: Semantics(
+        button: true,
+        label: subtitle != null && subtitle.trim().isNotEmpty
+            ? '$title — ${_plain(subtitle)}'
+            : title,
+        child: InkWell(
+          onTap: onTap,
           borderRadius: radius,
-          child: Stack(
-            children: [
-              if (mediaUrl != null && mediaUrl.isNotEmpty)
-                Positioned.fill(
-                  child: ClipRRect(
-                    borderRadius: radius,
-                    child: Image.network(
-                      mediaUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+          child: GlassContainer(
+            padding: EdgeInsets.zero,
+            borderRadius: radius,
+            child: Stack(
+              children: [
+                if (mediaUrl != null && mediaUrl.isNotEmpty)
+                  Positioned.fill(
+                    child: ClipRRect(
+                      borderRadius: radius,
+                      child: Semantics(
+                        image: true,
+                        label: title,
+                        child: Image.network(
+                          mediaUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                        ),
+                      ),
                     ),
                   ),
-                ),
               Positioned.fill(
                 child: DecoratedBox(
                   decoration: BoxDecoration(
@@ -202,6 +214,7 @@ class SectionItemCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
       ),
     );
   }

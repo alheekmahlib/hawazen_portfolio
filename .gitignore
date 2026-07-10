@@ -12,6 +12,9 @@
 .swiftpm/
 migrate_working_dir/
 
+# ZCode agent workspace (local tooling)
+.zcode/
+
 # IntelliJ related
 *.iml
 *.ipr
