@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://hawazen.vexaltech.dev/hawazen_portfolio/sitemap.xml

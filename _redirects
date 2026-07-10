@@ -1,0 +1,4 @@
+# Cloudflare Pages redirects — https://developers.cloudflare.com/pages/configuration/redirects/
+# Flutter Web is an SPA using a hash router, so deep links live under /#/...
+# Serve index.html for any unknown path so the SPA bootstraps correctly.
+/*    /index.html   200
