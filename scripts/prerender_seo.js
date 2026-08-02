@@ -51,6 +51,7 @@ function canonicalUrl(path) {
 const DEFAULT_OG_IMAGE = joinUrl(SITE_ORIGIN, BASE_HREF, 'og-image.png');
 
 // ── Dashboard API (apps / packages / websites) ─────────────────────────────
+// Upstream dashboard origin — used to fetch the JSON (Node-side, no CORS).
 const DASHBOARD_BASE = 'https://dash.vexaltech.dev';
 const FILTER_COMPANY = 'Alheekmah Library';
 const DASHBOARD_ENDPOINTS = {
@@ -59,15 +60,21 @@ const DASHBOARD_ENDPOINTS = {
   websites: 'https://dash.vexaltech.dev/api/websites',
 };
 
-// Make a media path returned by the dashboard absolute. Mirrors the Dart
-// `absolutizeMedia` helper 1:1.
+// Media is served via the same-origin Pages Function at /media/* on the
+// deployed site (functions/media/[[catchall]].js). og:image / JSON-LD image
+// URLs are emitted as absolute URLs against SITE_ORIGIN so crawlers fetch them
+// from the same domain as the content, and they match what the browser shows.
 function absolutizeMedia(path) {
   if (!path) return '';
   const t = String(path).trim();
   if (!t) return '';
   if (/^(https?:|data:)/i.test(t)) return t;
-  if (t.startsWith('/')) return DASHBOARD_BASE + t;
-  return DASHBOARD_BASE + '/' + t;
+  // Normalize to a /media/... path, then absolutize against the site origin.
+  let mediaPath;
+  if (t.startsWith('/media/')) mediaPath = t;
+  else if (t.startsWith('/')) mediaPath = '/media' + t;
+  else mediaPath = '/media/' + t;
+  return SITE_ORIGIN.replace(/\/+$/, '') + mediaPath;
 }
 
 // Slugify a name, matching lib/core/utils/slugify.dart.

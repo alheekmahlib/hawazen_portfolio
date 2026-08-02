@@ -34,11 +34,21 @@ class DashboardApiConfig {
   static final Set<String> apiSlugs = endpoints.keys.toSet();
 }
 
-/// Turns a media path returned by the dashboard into an absolute URL.
+/// Turns a media path returned by the dashboard into a loadable URL.
 ///
-/// - Relative paths (`/media/...`) are prefixed with [DashboardApiConfig.baseMediaUrl].
+/// Dashboard media lives under `/media/...` on the dashboard host, which serves
+/// NO CORS headers — so Flutter Web (which loads images via XMLHttpRequest)
+/// cannot fetch it cross-origin. To work around that, the site ships a
+/// Cloudflare Pages Function at `functions/media/[[catchall]].js` that
+/// re-serves `/media/*` on the site's own origin with CORS headers. We
+/// therefore rewrite dashboard media paths to that same-origin path.
+///
+/// - `/media/...` paths are returned **unchanged** (relative), so the browser
+///   resolves them against the site origin and hits the proxy.
 /// - Already-absolute URLs (`http://...`, `https://...`) and data URIs are
 ///   returned untouched.
+/// - Any other relative path is normalized to start with `/media/` so it also
+///   routes through the proxy.
 /// - Empty/null values become an empty string.
 String absolutizeMedia(String? path) {
   if (path == null) return '';
@@ -49,8 +59,12 @@ String absolutizeMedia(String? path) {
       trimmed.startsWith('data:')) {
     return trimmed;
   }
-  if (trimmed.startsWith('/')) {
-    return '${DashboardApiConfig.baseMediaUrl}$trimmed';
+  if (trimmed.startsWith('/media/')) {
+    // Same-origin path → served by the Pages Function proxy with CORS headers.
+    return trimmed;
   }
-  return '${DashboardApiConfig.baseMediaUrl}/$trimmed';
+  if (trimmed.startsWith('/')) {
+    return '/media$trimmed';
+  }
+  return '/media/$trimmed';
 }
