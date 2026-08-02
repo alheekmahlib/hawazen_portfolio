@@ -6,13 +6,17 @@
 // (hawazen.vexaltech.dev), fetches the upstream JSON server-side (where CORS
 // does not apply), and returns it with permissive CORS headers.
 //
+// Media rewriting: dashboard media paths look like `/media/2026/07/x.png`. The
+// dashboard media server sends no CORS headers either, so Flutter Web (which
+// fetches images via XMLHttpRequest) cannot load them cross-origin. To make
+// images load without depending on client-side rewriting (which a stale CDN
+// copy of main.dart.js could bypass), this proxy rewrites every `/media/...`
+// path in the JSON response to an absolute same-origin URL served by the
+// `/media/*` proxy function. This is the single source of truth for media URLs.
+//
 // Routing: any request to `/api/<anything>` is proxied to
 // `https://dash.vexaltech.dev/api/<anything>`, preserving the path and query
-// string. This keeps the client generic — add a new dashboard endpoint and it
-// works with zero changes here.
-//
-// Path is intentionally a catch-all (`[[catchall]]`) so unknown `/api/*`
-// sub-paths 404 upstream rather than falling through to the SPA.
+// string.
 
 const UPSTREAM_ORIGIN = 'https://dash.vexaltech.dev';
 
@@ -24,7 +28,6 @@ const CORS_HEADERS = {
 };
 
 export async function onRequestOptions() {
-  // Browser preflight: respond 204 with the CORS headers, no upstream call.
   return new Response(null, { status: 204, headers: CORS_HEADERS });
 }
 
@@ -32,40 +35,62 @@ export async function onRequestGet(context) {
   const { request } = context;
   const url = new URL(request.url);
 
-  // Rebuild the upstream URL: same path + query, different origin.
   const upstream = new URL(url.pathname + url.search, UPSTREAM_ORIGIN);
 
   let upstreamResponse;
   try {
     upstreamResponse = await fetch(upstream, {
       method: 'GET',
-      // Forward no cookies/credentials — the dashboard API is public JSON.
       headers: { Accept: 'application/json' },
       cf: { cacheTtl: 300, cacheEverything: true },
     });
   } catch (e) {
     return jsonResponse(
-      { error: 'Upstream fetch failed', detail: String(e && e.message || e) },
+      { error: 'Upstream fetch failed', detail: String((e && e.message) || e) },
       502,
     );
   }
 
-  // Forward the body and content-type, then layer our CORS headers on top.
+  const contentType = upstreamResponse.headers.get('Content-Type') || '';
   const headers = new Headers();
-  headers.set(
-    'Content-Type',
-    upstreamResponse.headers.get('Content-Type') || 'application/json',
-  );
+  headers.set('Content-Type', contentType || 'application/json');
   for (const [k, v] of Object.entries(CORS_HEADERS)) headers.set(k, v);
-
-  // Respect upstream caching hints where possible.
   const cache = upstreamResponse.headers.get('Cache-Control');
   if (cache) headers.set('Cache-Control', cache);
 
-  return new Response(upstreamResponse.body, {
+  // Only JSON responses may contain media paths to rewrite. Pass everything
+  // else (e.g. error pages) through untouched.
+  if (!contentType.includes('json')) {
+    return new Response(upstreamResponse.body, {
+      status: upstreamResponse.status,
+      headers,
+    });
+  }
+
+  // Rewrite /media/* paths to absolute same-origin URLs so the browser loads
+  // them through the /media proxy (CORS-safe), regardless of client version.
+  const body = await upstreamResponse.text();
+  const rewritten = rewriteMediaPaths(body, request);
+
+  // Recompute Content-Length since the body changed.
+  headers.delete('Content-Length');
+  return new Response(rewritten, {
     status: upstreamResponse.status,
     headers,
   });
+}
+
+// Replace `/media/...` occurrences with absolute same-origin URLs. Matches the
+// value inside JSON string values (e.g. "appBanner": "/media/2026/..."). Leaves
+// already-absolute URLs (http/https) and data: URIs untouched.
+function rewriteMediaPaths(jsonText, request) {
+  const origin = new URL(request.url).origin;
+  // Match "/media/ followed by a non-quote path, only when it's a value
+  // (preceded by a quote). This avoids touching the literal string elsewhere.
+  return jsonText.replace(
+    /"(\/media\/[^"]+)"/g,
+    (match, path) => `"${origin}${path}"`,
+  );
 }
 
 function jsonResponse(body, status = 200) {
@@ -74,3 +99,4 @@ function jsonResponse(body, status = 200) {
     headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
   });
 }
+
