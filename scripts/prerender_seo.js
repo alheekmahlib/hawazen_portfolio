@@ -50,6 +50,188 @@ function canonicalUrl(path) {
 // Keep this file at web/og-image.png (recommended 1200×630).
 const DEFAULT_OG_IMAGE = joinUrl(SITE_ORIGIN, BASE_HREF, 'og-image.png');
 
+// ── Dashboard API (apps / packages / websites) ─────────────────────────────
+const DASHBOARD_BASE = 'https://dash.vexaltech.dev';
+const FILTER_COMPANY = 'Alheekmah Library';
+const DASHBOARD_ENDPOINTS = {
+  apps: 'https://dash.vexaltech.dev/api/apps',
+  packages: 'https://dash.vexaltech.dev/api/packages',
+  websites: 'https://dash.vexaltech.dev/api/websites',
+};
+
+// Make a media path returned by the dashboard absolute. Mirrors the Dart
+// `absolutizeMedia` helper 1:1.
+function absolutizeMedia(path) {
+  if (!path) return '';
+  const t = String(path).trim();
+  if (!t) return '';
+  if (/^(https?:|data:)/i.test(t)) return t;
+  if (t.startsWith('/')) return DASHBOARD_BASE + t;
+  return DASHBOARD_BASE + '/' + t;
+}
+
+// Slugify a name, matching lib/core/utils/slugify.dart.
+function slugify(input) {
+  let s = String(input || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  return s || 'item';
+}
+
+function firstNonEmpty(values) {
+  for (const v of values) {
+    if (v != null && String(v).trim() !== '') return String(v).trim();
+  }
+  return null;
+}
+
+function asStringList(v) {
+  if (Array.isArray(v)) {
+    return v.map((e) => String(e).trim()).filter((e) => e !== '');
+  }
+  return [];
+}
+
+// Converts one raw dashboard item (filtered by companyName upstream) into the
+// site's section/item shape. Mirrors lib/features/content/data/dashboard_api_client.dart.
+function convertApiItem(slug, raw) {
+  const apiId = raw.id != null ? String(raw.id) : '';
+  const fields = {};
+  let actionFields = [];
+  const body = String(raw.body || '').trim();
+
+  if (slug === 'apps') {
+    const nameAr = String(raw.appTitle || '').trim();
+    const nameEn = String(raw.appName || '').trim();
+    fields.name = {
+      en: firstNonEmpty([nameEn, nameAr]) || '',
+      ar: firstNonEmpty([nameAr, nameEn]) || '',
+    };
+    fields.banner = absolutizeMedia(raw.appBanner);
+    fields.description = { en: body, ar: body };
+    fields.screens = asStringList(raw.banners).map(absolutizeMedia);
+    actionFields = ['appstore', 'playstore', 'appgallery', 'macappstore'];
+    if (raw.urlAppStore) fields.appstore = String(raw.urlAppStore);
+    if (raw.urlPlayStore) fields.playstore = String(raw.urlPlayStore);
+    if (raw.urlAppGallery) fields.appgallery = String(raw.urlAppGallery);
+    if (raw.urlMacAppStore) fields.macappstore = String(raw.urlMacAppStore);
+    fields.tags = asStringList(raw.tags);
+    const base = firstNonEmpty([nameEn, nameAr]) || 'app';
+    return {
+      id: apiId ? `${slugify(base)}-${apiId}` : slugify(base),
+      enabled: true,
+      fields,
+      actionFields,
+      sectionSlug: 'apps',
+    };
+  }
+
+  if (slug === 'packages') {
+    const name = String(raw.packageName || '').trim();
+    fields.name = { en: name, ar: name };
+    fields.banner = absolutizeMedia(firstNonEmpty([raw.packageBanner, raw.packageLogo]));
+    fields.description = { en: body, ar: body };
+    actionFields = ['docs', 'pub', 'github'];
+    if (raw.docsUrl) fields.docs = String(raw.docsUrl);
+    if (raw.pubUrl) fields.pub = String(raw.pubUrl);
+    if (raw.githubUrl) fields.github = String(raw.githubUrl);
+    fields.tags = asStringList(raw.tags);
+    const base = name || 'package';
+    return {
+      id: apiId ? `${slugify(base)}-${apiId}` : slugify(base),
+      enabled: true,
+      fields,
+      actionFields,
+      sectionSlug: 'packages',
+    };
+  }
+
+  // websites
+  const nameAr = String(raw.websiteTitle || '').trim();
+  const nameEn =
+    String(raw.websiteNameEn || '').trim() ||
+    String(raw.websiteName || '').trim();
+  fields.name = {
+    en: firstNonEmpty([nameEn, nameAr]) || '',
+    ar: firstNonEmpty([nameAr, nameEn]) || '',
+  };
+  if (raw.websiteLogo) fields.banner = absolutizeMedia(raw.websiteLogo);
+  fields.description = { en: body, ar: body };
+  actionFields = ['live', 'github'];
+  if (raw.urlLive) fields.live = String(raw.urlLive);
+  if (raw.urlGithub) fields.github = String(raw.urlGithub);
+  fields.tags = asStringList(raw.tags);
+  const base = firstNonEmpty([nameEn, nameAr]) || 'website';
+  return {
+    id: apiId ? `${slugify(base)}-${apiId}` : slugify(base),
+    enabled: true,
+    fields,
+    actionFields,
+    sectionSlug: 'websites',
+  };
+}
+
+// Section templates for each dashboard-backed slug. Field names match the
+// Dart DashboardApiClient so the SEO output renders the same data the app shows.
+const API_SECTION_TEMPLATES = {
+  apps: {
+    id: 'sec_apps_api',
+    slug: 'apps',
+    title: { en: 'Apps', ar: 'التطبيقات' },
+  },
+  packages: {
+    id: 'sec_packages_api',
+    slug: 'packages',
+    title: { en: 'Libraries', ar: 'المكتبات' },
+  },
+  websites: {
+    id: 'sec_websites_api',
+    slug: 'websites',
+    title: { en: 'Websites', ar: 'المواقع' },
+  },
+};
+
+// Fetches every dashboard section in parallel, filters by company, and returns
+// fully-formed PortfolioSection objects (empty list on any total failure).
+async function fetchDashboardSections() {
+  const keys = Object.keys(DASHBOARD_ENDPOINTS);
+  const results = await Promise.all(
+    keys.map(async (slug) => {
+      try {
+        const data = await fetchJson(DASHBOARD_ENDPOINTS[slug]);
+        const list = Array.isArray(data[slug]) ? data[slug] : [];
+        const filtered = list.filter(
+          (it) => String(it && it.companyName) === FILTER_COMPANY,
+        );
+        if (filtered.length === 0) return null;
+        const items = filtered.map((raw) => convertApiItem(slug, raw));
+        return { slug, items };
+      } catch (_) {
+        return null;
+      }
+    }),
+  );
+
+  const sections = [];
+  for (const r of results) {
+    if (!r) continue;
+    const tpl = API_SECTION_TEMPLATES[r.slug];
+    sections.push({
+      id: tpl.id,
+      slug: tpl.slug,
+      title: tpl.title,
+      enabled: true,
+      items: r.items,
+      _fromApi: true,
+    });
+  }
+  return sections;
+}
+
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
 function escapeHtml(str) {
@@ -308,6 +490,21 @@ function writeHtml(dir, html) {
   fs.writeFileSync(path.join(dir, 'index.html'), html, 'utf8');
 }
 
+// Mirrors ContentController._mergeSections in Dart: drop any content.json
+// section whose slug is provided by the dashboard, then prepend the dashboard
+// sections in the canonical order (apps → packages → websites) so Websites
+// renders just before Designs regardless of the JSON's section order.
+const SECTION_ORDER = ['apps', 'packages', 'websites'];
+function mergeApiSections(data, apiSections) {
+  const apiSlugs = new Set(apiSections.map((s) => s.slug));
+  const bySlug = Object.fromEntries(apiSections.map((s) => [s.slug, s]));
+
+  const kept = (data.sections || []).filter((s) => !apiSlugs.has(s.slug));
+  const orderedApi = SECTION_ORDER.map((slug) => bySlug[slug]).filter(Boolean);
+
+  return { ...data, sections: [...orderedApi, ...kept] };
+}
+
 // ── Main ────────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -330,6 +527,21 @@ async function main() {
     data = await fetchJson(FALLBACK_URL);
   }
   console.log('✅ Content loaded');
+
+  // Merge dashboard API sections (apps / packages / websites). Failures are
+  // non-fatal: if the dashboard is down, we keep rendering content.json only.
+  try {
+    console.log('📥 Fetching dashboard sections (apps/packages/websites)...');
+    const apiSections = await fetchDashboardSections();
+    if (apiSections.length > 0) {
+      data = mergeApiSections(data, apiSections);
+      console.log(`✅ Merged ${apiSections.length} dashboard section(s)`);
+    } else {
+      console.log('ℹ️  No dashboard sections returned; using content.json only');
+    }
+  } catch (e) {
+    console.log(`⚠️  Dashboard fetch failed (${e.message}); using content.json only`);
+  }
 
   // Generate routes
   const routes = generateRoutes(data);

@@ -41,6 +41,14 @@ jobs:
           # secret can never point SEO at the wrong domain again.
           SITE_ORIGIN: "https://hawazen.vexaltech.dev"
 
+      # Stage the Pages Function alongside the static assets so
+      # `wrangler pages deploy build/web` picks it up as /api/*. The function is
+      # a CORS proxy for the dashboard API, which serves no CORS headers itself.
+      - name: Stage Pages Function (CORS proxy)
+        run: |
+          mkdir -p build/web
+          cp -r functions build/web/functions
+
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
