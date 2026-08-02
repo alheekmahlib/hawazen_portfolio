@@ -58,9 +58,20 @@
   }
 
   html {
-    scroll-behavior: smooth;
+    /* Smooth scrolling is driven by Lenis in JS; keep CSS off to avoid conflict. */
     scrollbar-gutter: stable;
     color-scheme: dark;
+  }
+
+  /* Hide the native cursor when the custom one is active (fine-pointer only). */
+  html.cursor-none,
+  html.cursor-none * {
+    cursor: none !important;
+  }
+
+  /* Shrink the cursor dot slightly while pressed. */
+  html.cursor-pressed .app-cursor-dot {
+    transform: scale(0.7);
   }
 
   body {

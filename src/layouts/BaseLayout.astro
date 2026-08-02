@@ -4,7 +4,9 @@ import "@fontsource/noto-sans-arabic/400.css";
 import "@fontsource/noto-sans-arabic/500.css";
 import "@fontsource/noto-sans-arabic/600.css";
 import "@fontsource/noto-sans-arabic/700.css";
+import "lenis/dist/lenis.css";
 import "@/styles/global.css";
+import { ClientEffects } from "@/components/client-effects.tsx";
 import type { Locale } from "@/lib/types";
 
 interface Props {
@@ -38,6 +40,7 @@ const lang = locale;
   </head>
   <body>
     <div class="app-background" aria-hidden="true"></div>
+    <ClientEffects client:load />
     <slot />
   </body>
 </html>
