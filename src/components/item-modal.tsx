@@ -43,9 +43,13 @@ export function ItemModal({
     document.addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    // Stop Lenis so the wheel scrolls this modal natively instead of the page.
+    const lenis = window.__lenis;
+    lenis?.stop();
     return () => {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = prev;
+      lenis?.start();
     };
   }, [open, onClose]);
 
@@ -61,8 +65,9 @@ export function ItemModal({
         className="absolute inset-0 cursor-default bg-black/70 backdrop-blur-sm animate-fade-in"
       />
 
-      {/* Sheet */}
-      <div className="glass-strong relative z-10 max-h-[92vh] w-full max-w-[980px] overflow-y-auto rounded-t-3xl sm:rounded-3xl animate-scale-in">
+      {/* Sheet — data-lenis-prevent lets the wheel scroll this container
+          natively instead of being hijacked by Lenis on the page behind it. */}
+      <div data-lenis-prevent className="glass-strong relative z-10 max-h-[92vh] w-full max-w-[980px] overflow-y-auto rounded-t-3xl sm:rounded-3xl animate-scale-in">
         {/* Close button */}
         <button
           type="button"

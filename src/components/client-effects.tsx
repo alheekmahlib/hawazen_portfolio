@@ -4,11 +4,21 @@
  *  - Custom dot + ring cursor
  *
  * Mounted as a `client:load` island in BaseLayout so it runs on every route.
+ *
+ * The Lenis instance is exposed at `window.__lenis` so modals can stop/resume
+ * smooth scrolling while they're open (Lenis otherwise hijacks wheel events and
+ * breaks native scrolling inside modal content).
  */
 "use client";
 import * as React from "react";
 import Lenis from "lenis";
 import { CustomCursor } from "@/components/custom-cursor";
+
+declare global {
+  interface Window {
+    __lenis?: Lenis;
+  }
+}
 
 export function ClientEffects() {
   React.useEffect(() => {
@@ -24,6 +34,7 @@ export function ClientEffects() {
       // Keep native touch scrolling — Lenis mainly smooths wheel/trackpad.
       smoothTouch: false,
     });
+    window.__lenis = lenis;
 
     let raf = 0;
     const loop = (time: number) => {
@@ -50,6 +61,7 @@ export function ClientEffects() {
       cancelAnimationFrame(raf);
       document.removeEventListener("click", onAnchorClick);
       lenis.destroy();
+      delete window.__lenis;
     };
   }, []);
 
