@@ -1,0 +1,43 @@
+---
+import "@fontsource-variable/ibm-plex-sans";
+import "@fontsource/noto-sans-arabic/400.css";
+import "@fontsource/noto-sans-arabic/500.css";
+import "@fontsource/noto-sans-arabic/600.css";
+import "@fontsource/noto-sans-arabic/700.css";
+import "@/styles/global.css";
+import type { Locale } from "@/lib/types";
+
+interface Props {
+  locale: Locale;
+  title: string;
+  description: string;
+  /** Path-relative canonical (e.g. "/", "/?lang=ar"). */
+  canonical?: string;
+}
+
+const { locale, title, description, canonical = "/" } = Astro.props;
+const dir = locale === "ar" ? "rtl" : "ltr";
+const lang = locale;
+---
+
+<!doctype html>
+<html lang={lang} dir={dir} class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="theme-color" content="#023047" />
+
+    <link rel="icon" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/icons/Icon-192.png" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <slot name="head" />
+  </head>
+  <body>
+    <div class="app-background" aria-hidden="true"></div>
+    <slot />
+  </body>
+</html>

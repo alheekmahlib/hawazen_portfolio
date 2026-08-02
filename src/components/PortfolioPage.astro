@@ -1,0 +1,35 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import BaseHead from "@/components/BaseHead.astro";
+import Contact from "@/components/Contact.astro";
+import Footer from "@/components/Footer.astro";
+import { PortfolioApp } from "@/components/portfolio-app.tsx";
+import { getPortfolioData } from "@/lib/data";
+import { t, ui } from "@/i18n/ui";
+import type { Locale } from "@/lib/types";
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const data = await getPortfolioData();
+
+const name = t(data.site.name, locale);
+const subtitle = t(data.site.subtitle, locale);
+const title = `${name} — ${subtitle}`;
+const description = t(data.site.bio, locale);
+const origin = data.site.domain.replace(/\/$/, "");
+// Each locale gets its own canonical path.
+const path = locale === "ar" ? "/ar/" : "/";
+const canonical = origin + path;
+---
+
+<BaseLayout locale={locale} title={title} description={description} canonical={canonical}>
+  <BaseHead slot="head" site={data.site} locale={locale} title={title} description={description} path={path} />
+
+  <main>
+    <PortfolioApp data={data} locale={locale} client:load />
+    <Contact site={data.site} locale={locale} />
+    <Footer data={data} locale={locale} />
+  </main>
+</BaseLayout>

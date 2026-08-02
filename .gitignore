@@ -1,49 +1,38 @@
-# Miscellaneous
-*.class
+# build output
+dist/
+.output/
+
+# dependencies
+node_modules/
+
+# logs
 *.log
-*.pyc
-*.swp
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# environment variables
+.env
+.env.production
+.env.local
+
+# Astro
+.astro/
+
+# editor / OS
 .DS_Store
-.atom/
-.build/
-.buildlog/
+.vscode/
+.idea/
+*.swp
 .history
-.svn/
-.swiftpm/
-migrate_working_dir/
 
 # ZCode agent workspace (local tooling)
 .zcode/
 
-# IntelliJ related
-*.iml
-*.ipr
-*.iws
-.idea/
-
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
-.dart_tool/
-.flutter-plugins-dependencies
-.pub-cache/
-.pub/
-/build/
-/coverage/
-
-# Symbolication related
-app.*.symbols
-
-# Obfuscation related
-app.*.map.json
-
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
+# Playwright MCP artifacts (generated during dev)
 .playwright-mcp/
+
+# Local inspection screenshots (kept out of git; assets live under public/)
+*.png
+!public/**/*.png

@@ -1,0 +1,93 @@
+---
+/**
+ * Footer — adapted from the @efferd/footer-2 block.
+ * Two-column layout: a wide brand column (logo + bio + social icon buttons) and
+ * two narrow link columns (Quick Links + Connect), framed by full-width
+ * dividers, with the copyright centered at the bottom. A subtle top radial glow
+ * mirrors the efferd dark-mode footer treatment.
+ */
+import type { Locale, PortfolioData } from "@/lib/types";
+import { t, ui } from "@/i18n/ui";
+
+interface Props {
+  data: PortfolioData;
+  locale: Locale;
+}
+const { data, locale } = Astro.props;
+const { site, sections, designs } = data;
+const year = new Date().getFullYear();
+const name = t(site.name, locale);
+const bio = t(site.bio, locale);
+---
+
+<footer class="relative mx-auto mt-8 w-full max-w-[1100px] px-4 lg:border-x lg:border-border/50 dark:bg-[radial-gradient(35%_80%_at_15%_0%,rgb(255_255_255/0.06),transparent)]">
+  <div class="h-px w-full bg-border/50"></div>
+
+  <div class="grid grid-cols-6 gap-6 py-6">
+    <!-- Brand column (wide) -->
+    <div class="col-span-6 flex flex-col gap-4 pt-3 md:col-span-4">
+      <a href={locale === "ar" ? "/ar/" : "/"} class="w-max">
+        <img src="/hawazen.svg" alt={name} class="h-7 w-auto" />
+      </a>
+      <p class="max-w-sm text-pretty text-sm text-muted-foreground">
+        {bio}
+      </p>
+      <div class="flex gap-2">
+        {site.social.map((s) => (
+          <a
+            href={s.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={s.label}
+            class="inline-flex size-9 items-center justify-center rounded-md border border-border text-foreground transition-colors hover:bg-muted/60"
+          >
+            {/github/i.test(s.label) ? (
+              <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49v-1.7c-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.9 1.57 2.36 1.12 2.94.85.09-.66.35-1.12.63-1.38-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.27 2.75 1.05a9.4 9.4 0 0 1 5 0c1.91-1.32 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.94-2.34 4.81-4.57 5.06.36.32.68.94.68 1.9v2.82c0 .27.18.6.69.49A10.26 10.26 0 0 0 22 12.25C22 6.58 17.52 2 12 2Z" /></svg>
+            ) : (
+              <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14ZM7.12 20.45H3.55V9h3.57v11.45ZM22.22 0H1.77C.8 0 0 .78 0 1.74v20.52C0 23.22.8 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.74V1.74C24 .78 23.2 0 22.22 0Z" /></svg>
+            )}
+          </a>
+        ))}
+        <a
+          href={`mailto:${site.contact.email}`}
+          aria-label="Email"
+          class="inline-flex size-9 items-center justify-center rounded-md border border-border text-foreground transition-colors hover:bg-muted/60"
+        >
+          <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="m2 7 10 6 10-6" /></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Quick links column -->
+    <div class="col-span-3 w-full md:col-span-1">
+      <span class="text-xs text-muted-foreground">{t(ui.footer.quickLinks, locale)}</span>
+      <div class="mt-2 flex flex-col gap-2">
+        {sections.map((s) => (
+          <a class="w-max text-sm hover:underline" href={`#${s.slug}`}>{t(s.title, locale)}</a>
+        ))}
+        {designs && designs.images.length > 0 && (
+          <a class="w-max text-sm hover:underline" href="#designs">{t(designs.title, locale)}</a>
+        )}
+        <a class="w-max text-sm hover:underline" href="#contact">{t(ui.nav.contact, locale)}</a>
+      </div>
+    </div>
+
+    <!-- Connect column -->
+    <div class="col-span-3 w-full md:col-span-1">
+      <span class="text-xs text-muted-foreground">{t(ui.footer.connect, locale)}</span>
+      <div class="mt-2 flex flex-col gap-2">
+        {site.social.map((s) => (
+          <a class="w-max text-sm hover:underline" href={s.url} target="_blank" rel="noopener noreferrer">{s.label}</a>
+        ))}
+        <a class="w-max text-sm hover:underline" href={`mailto:${site.contact.email}`} dir="ltr">{site.contact.email}</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="h-px w-full bg-border/50"></div>
+  <div class="flex items-center justify-center gap-2 py-4">
+    <p class="text-center text-sm font-light text-muted-foreground">
+      &copy; {year} {name} — {t(ui.footer.rights, locale)}
+    </p>
+  </div>
+</footer>

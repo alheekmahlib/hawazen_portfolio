@@ -1,0 +1,69 @@
+---
+import { GSC_TOKENS } from "@/config";
+import type { Locale, SiteInfo } from "@/lib/types";
+
+interface Props {
+  site: SiteInfo;
+  locale: Locale;
+  title: string;
+  description: string;
+  /** Path-relative URL, e.g. "/" or "/?lang=ar". */
+  path: string;
+  /** Optional JSON-LD object(s) to embed. */
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+}
+
+const { site, locale, title, description, path, jsonLd } = Astro.props;
+
+const origin = site.domain.replace(/\/$/, "");
+const canonical = `${origin}${path}`;
+// Each locale is prerendered at its own path: en → "/", ar → "/ar/".
+const enHref = `${origin}/`;
+const arHref = `${origin}/ar/`;
+const selfHref = locale === "ar" ? arHref : enHref;
+
+// JSON-LD Person schema for the home page (mirrors prerender_seo.js).
+const personLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: site.name.en,
+  jobTitle: site.subtitle.en,
+  description: site.bio.en,
+  url: origin,
+  email: `mailto:${site.contact.email}`,
+  telephone: site.contact.phone,
+  sameAs: site.social.map((s) => s.url),
+};
+
+const ldBlocks = jsonLd ?? personLd;
+const ldArray = Array.isArray(ldBlocks) ? ldBlocks : [ldBlocks];
+---
+
+<!-- Open Graph -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content={site.name.en} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={`${origin}/og-image.png`} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={`${origin}/og-image.png`} />
+
+<!-- hreflang alternates (en / ar / x-default) -->
+<link rel="alternate" hreflang="en" href={enHref} />
+<link rel="alternate" hreflang="ar" href={arHref} />
+<link rel="alternate" hreflang="x-default" href={enHref} />
+
+<!-- Google Search Console verification tokens (preserved) -->
+{GSC_TOKENS.map((token) => <meta name="google-site-verification" content={token} />)}
+
+<!-- JSON-LD structured data -->
+{ldArray.map((block) => (
+  <script type="application/ld+json" set:html={JSON.stringify(block)} />
+))}

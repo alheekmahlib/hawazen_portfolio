@@ -1,0 +1,164 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Brand palette — ported from lib/core/theme/app_theme.dart.
+ * The site is dark-only; we map the Flutter tokens onto shadcn semantic
+ * variables so the efferd blocks (which use `bg-background` etc.) inherit
+ * the brand automatically.
+ */
+@layer base {
+  :root {
+    /* Brand */
+    --brand-bg: #023047;
+    --brand-bg-end: #07080b;
+    --brand-surface: #219ebc;
+    --brand-primary: #669bbc;
+    --brand-secondary: #22d3ee;
+
+    /* shadcn semantic tokens (dark theme, pure HSL — no alpha here, so Tailwind's
+       opacity-modifier syntax like bg-border/50, text-muted-foreground/70 works). */
+    --background: 202 100% 14%; /* #023047 */
+    --foreground: 0 0% 100%;
+
+    --card: 202 60% 16%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 202 70% 12%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 198 78% 56%; /* #219EBC */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 187 85% 53%; /* #22D3EE */
+    --secondary-foreground: 202 100% 12%;
+
+    --muted: 215 28% 22%;
+    --muted-foreground: 210 40% 84%;
+
+    --accent: 198 78% 56%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 215 28% 32%;
+    --input: 215 28% 32%;
+    --ring: 187 85% 53%;
+
+    --radius: 0.85rem;
+
+    --font-sans: "IBM Plex Sans Variable", "IBM Plex Sans", system-ui, sans-serif;
+    --font-arabic: "Noto Sans Arabic", "IBM Plex Sans", sans-serif;
+  }
+
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scrollbar-gutter: stable;
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--brand-bg);
+    color: hsl(var(--foreground));
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    min-height: 100dvh;
+  }
+
+  /* Arabic typography + RTL refinements */
+  [dir="rtl"] body {
+    font-family: var(--font-arabic);
+  }
+
+  ::selection {
+    background-color: rgb(34 211 238 / 0.3);
+    color: #fff;
+  }
+
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* Glassmorphism surface — mirrors Flutter GlassContainer (blur 18, white 6%/10%). */
+  .glass {
+    background-color: rgb(255 255 255 / 0.06);
+    border: 1px solid rgb(255 255 255 / 0.1);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+
+  .glass-strong {
+    background-color: rgb(255 255 255 / 0.09);
+    border: 1px solid rgb(255 255 255 / 0.14);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+  }
+
+  /* Brand text gradient — name h1 (#219EBC → #22D3EE). */
+  .text-gradient {
+    background-image: linear-gradient(
+      to right,
+      var(--brand-surface),
+      var(--brand-secondary)
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* The pinned animated background — re-implements portfolio_background.dart. */
+  .app-background {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    background-color: var(--brand-bg);
+    background-image: radial-gradient(
+      circle at 20% 12%,
+      var(--brand-bg),
+      var(--brand-bg-end) 78%
+    );
+  }
+
+  .app-background::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgb(255 255 255 / 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(255 255 255 / 0.035) 1px, transparent 1px);
+    background-size: 56px 56px;
+    -webkit-mask-image: radial-gradient(circle at 50% 40%, black, transparent 85%);
+    mask-image: radial-gradient(circle at 50% 40%, black, transparent 85%);
+  }
+
+  .app-background::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(38rem 38rem at 78% 8%, rgb(33 158 188 / 0.16), transparent 60%),
+      radial-gradient(30rem 30rem at 12% 92%, rgb(34 211 238 / 0.12), transparent 62%);
+  }
+}

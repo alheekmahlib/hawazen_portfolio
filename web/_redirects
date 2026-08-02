@@ -1,8 +1,0 @@
-# Cloudflare Pages redirects — https://developers.cloudflare.com/pages/configuration/redirects/
-# Flutter Web is an SPA using a hash router, so deep links live under /#/...
-# Serve index.html for any unknown path so the SPA bootstraps correctly.
-#
-# Note: /api/* is served by the Pages Function at functions/api/[[catchall]].js
-# (CORS proxy for the dashboard API). Pages Functions take precedence over
-# these redirects, so no exclusion rule is needed here.
-/*    /index.html   200

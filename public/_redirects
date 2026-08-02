@@ -1,0 +1,7 @@
+# Cloudflare Pages redirects
+# https://developers.cloudflare.com/pages/configuration/redirects/
+
+# Backward compatibility: the legacy Flutter site used ?lang=ar for Arabic.
+# The Astro site serves Arabic at /ar/ instead — redirect the old query form.
+/?lang=ar    /ar/    302
+/?lang=en    /       302

@@ -1,4 +1,4 @@
-name: Deploy Flutter Web to Cloudflare Pages
+name: Deploy to Cloudflare Pages
 
 on:
   push:
@@ -21,37 +21,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          channel: stable
-          cache: true
+          node-version: "22"
+          cache: "npm"
 
       - name: Install dependencies
-        run: flutter pub get
+        run: npm ci
 
-      - name: Build web (root base-href for custom domain)
-        run: flutter build web --release --pwa-strategy=none --base-href "/"
-
-      - name: Pre-render SEO pages
-        run: node scripts/prerender_seo.js build/web "/"
+      - name: Build (Astro SSG)
+        run: npm run build
         env:
-          # Canonical origin for every URL the pre-renderer emits (canonical,
-          # og:url, hreflang, sitemap, robots). Hard-coded so a missing/mis-set
-          # secret can never point SEO at the wrong domain again.
+          # Canonical origin for every URL Astro emits (canonical, og:url,
+          # hreflang, sitemap, robots). Hard-coded so a missing/mis-set value
+          # can never point SEO at the wrong domain.
           SITE_ORIGIN: "https://hawazen.vexaltech.dev"
-
-      # Stage the Pages Function alongside the static assets so
-      # `wrangler pages deploy build/web` picks it up as /api/*. The function is
-      # a CORS proxy for the dashboard API, which serves no CORS headers itself.
-      - name: Stage Pages Function (CORS proxy)
-        run: |
-          mkdir -p build/web
-          cp -r functions build/web/functions
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy build/web --project-name=hawazen-portfolio
+          command: pages deploy dist --project-name=hawazen-portfolio

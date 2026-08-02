@@ -1,0 +1,84 @@
+---
+/**
+ * Contact — adapted from the @efferd/contact-1 block, recoloured to match the
+ * site's dark glassmorphism + cyan accent palette (instead of the efferd block's
+ * flat muted greys). A heading + a 3-cell grid (Email / Phone / WhatsApp)
+ * framed by soft dividers; each cell is a glass card with a gradient icon box.
+ */
+import type { Locale, SiteInfo } from "@/lib/types";
+import { t, ui } from "@/i18n/ui";
+
+interface Props {
+  site: SiteInfo;
+  locale: Locale;
+}
+const { site, locale } = Astro.props;
+const { contact } = site;
+---
+
+<section id="contact" class="mx-auto w-full max-w-4xl scroll-mt-24 px-4 pt-10">
+  <h2 class="mb-6 text-lg font-medium md:text-2xl">
+    {t(ui.contact.title, locale)}
+  </h2>
+
+  <div class="relative">
+    <div class="h-px w-full bg-white/10"></div>
+
+    <div class="grid gap-3 px-px py-px md:grid-cols-3">
+      <!-- Email -->
+      <a
+        href={`mailto:${contact.email}`}
+        class="glass group flex items-center gap-3 rounded-xl p-3 transition-all hover:-translate-y-0.5 hover:bg-white/10"
+      >
+        <span
+          class="flex size-12 shrink-0 items-center justify-center rounded-lg text-white shadow-md shadow-brand-surface/30 transition-transform group-hover:scale-105"
+          style="background: linear-gradient(135deg, #219EBC, #22D3EE);"
+        >
+          <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="m2 7 10 6 10-6" /></svg>
+        </span>
+        <span class="flex min-w-0 flex-col gap-y-0.5">
+          <h3 class="text-sm font-medium">{t(ui.contact.email, locale)}</h3>
+          <p class="truncate text-xs text-muted-foreground" dir="ltr">{contact.email}</p>
+        </span>
+      </a>
+
+      <!-- Phone -->
+      <a
+        href={`tel:${contact.phone}`}
+        class="glass group flex items-center gap-3 rounded-xl p-3 transition-all hover:-translate-y-0.5 hover:bg-white/10"
+      >
+        <span
+          class="flex size-12 shrink-0 items-center justify-center rounded-lg text-white shadow-md shadow-brand-surface/30 transition-transform group-hover:scale-105"
+          style="background: linear-gradient(135deg, #219EBC, #22D3EE);"
+        >
+          <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z" /></svg>
+        </span>
+        <span class="flex min-w-0 flex-col gap-y-0.5">
+          <h3 class="text-sm font-medium">{t(ui.contact.phoneLabel, locale)}</h3>
+          <p class="truncate text-xs text-muted-foreground" dir="ltr">{contact.phone}</p>
+        </span>
+      </a>
+
+      <!-- WhatsApp -->
+      <a
+        href={contact.whatsapp}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="glass group flex items-center gap-3 rounded-xl p-3 transition-all hover:-translate-y-0.5 hover:bg-white/10"
+      >
+        <span
+          class="flex size-12 shrink-0 items-center justify-center rounded-lg text-white shadow-md shadow-brand-surface/30 transition-transform group-hover:scale-105"
+          style="background: linear-gradient(135deg, #219EBC, #22D3EE);"
+        >
+          <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2Zm5.8 14.13c-.24.68-1.4 1.3-1.94 1.34-.5.04-1.13.2-3.7-.77-3.1-1.18-5.08-4.34-5.24-4.55-.15-.2-1.25-1.66-1.25-3.16 0-1.5.79-2.24 1.07-2.54.27-.3.6-.38.8-.38l.57.01c.18.01.43-.07.68.52.24.59.83 2.04.9 2.19.07.15.12.32.02.52-.1.2-.15.32-.3.5-.15.18-.31.4-.45.53-.15.15-.3.31-.13.6.17.3.76 1.25 1.63 2.02 1.12 1 2.06 1.31 2.36 1.46.3.15.47.13.64-.08.17-.2.74-.86.94-1.16.2-.3.4-.25.67-.15.27.1 1.7.8 2 .95.3.15.5.22.57.35.07.12.07.72-.17 1.4Z" /></svg>
+        </span>
+        <span class="flex min-w-0 flex-col gap-y-0.5">
+          <h3 class="text-sm font-medium">{t(ui.contact.whatsapp, locale)}</h3>
+          <p class="truncate text-xs text-muted-foreground" dir="ltr">{contact.phone}</p>
+        </span>
+      </a>
+    </div>
+
+    <div class="h-px w-full bg-white/10"></div>
+  </div>
+</section>
