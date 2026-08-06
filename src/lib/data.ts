@@ -15,6 +15,7 @@ import { absolutizeMedia } from "@/lib/utils";
 import type {
   ActionLink,
   DesignGallery,
+  Locale,
   PortfolioData,
   PortfolioItem,
   PortfolioSection,
@@ -60,19 +61,49 @@ function itemId(nameEn: string, apiId: number | string): string {
 /*  Apps                                                                      */
 /* -------------------------------------------------------------------------- */
 
+interface LocalizedName {
+  lang: string;
+  name: string;
+}
+
+interface LocalizedBody {
+  lang: string;
+  value: string;
+}
+
 interface RawApp {
   id: number;
-  appName?: string;
-  appTitle?: string;
+  slug?: string;
+  /** Localized name as a language-tagged array (e.g. [{ lang: "ar", name: "…" }]). */
+  appName?: LocalizedName[];
   companyName?: string;
+  appLogo?: string;
   appBanner?: string;
   banners?: string[];
-  body?: string;
+  /** Localized description as a language-tagged array (e.g. [{ lang: "ar", value: "…" }]). */
+  body?: LocalizedBody[];
   urlAppStore?: string;
   urlPlayStore?: string;
   urlAppGallery?: string;
   urlMacAppStore?: string;
   tags?: string[];
+}
+
+/**
+ * Pick a localized string out of a language-tagged array from the API.
+ * Falls back to the other locale, then to the first available entry.
+ */
+function localizedValue<T extends { lang: string }>(
+  arr: T[] | undefined,
+  valueKey: keyof T,
+  locale: Locale,
+): string | undefined {
+  if (!arr || arr.length === 0) return undefined;
+  const exact = arr.find((e) => e.lang === locale);
+  if (exact) return String(exact[valueKey] ?? "").trim() || undefined;
+  const other = arr.find((e) => e.lang !== locale);
+  if (other) return String(other[valueKey] ?? "").trim() || undefined;
+  return String(arr[0][valueKey] ?? "").trim() || undefined;
 }
 
 function mapApp(raw: RawApp): PortfolioItem {
@@ -98,11 +129,20 @@ function mapApp(raw: RawApp): PortfolioItem {
       href: raw.urlMacAppStore,
     });
 
+  // Resolve localized name/description from the API's language-tagged arrays.
+  const nameEn = localizedValue(raw.appName, "name", "en");
+  const nameAr = localizedValue(raw.appName, "name", "ar");
+  const descEn = localizedValue(raw.body, "value", "en");
+  const descAr = localizedValue(raw.body, "value", "ar");
+
+  // Prefer the slug for a stable id; fall back to the (Latin) English name.
+  const idSeed = raw.slug ?? nameEn ?? `app-${raw.id}`;
+
   return {
-    id: itemId(raw.appName ?? `app-${raw.id}`, raw.id),
-    name: { en: raw.appName ?? raw.appTitle ?? "App", ar: raw.appTitle },
-    description: { en: raw.body ?? "", ar: raw.body ?? "" },
-    banner: absolutizeMedia(raw.appBanner),
+    id: itemId(idSeed, raw.id),
+    name: { en: nameEn ?? nameAr ?? "App", ar: nameAr ?? nameEn },
+    description: { en: descEn ?? descAr ?? "", ar: descAr ?? descEn ?? "" },
+    banner: absolutizeMedia(raw.appBanner) ?? absolutizeMedia(raw.appLogo),
     gallery: (raw.banners ?? [])
       .map((b) => absolutizeMedia(b))
       .filter((b): b is string => Boolean(b)),
