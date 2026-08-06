@@ -1,7 +1,9 @@
 # Cloudflare Pages redirects
 # https://developers.cloudflare.com/pages/configuration/redirects/
-
-# Backward compatibility: the legacy Flutter site used ?lang=ar for Arabic.
-# The Astro site serves Arabic at /ar/ instead — redirect the old query form.
-/?lang=ar    /ar/    302
-/?lang=en    /       302
+#
+# NOTE: Cloudflare Pages does not support query-string matching in _redirects —
+# the path is matched verbatim, so a rule like `/?lang=ar` matches EVERY request
+# to `/` (the `?lang=ar` is ignored) and turns into an unconditional redirect.
+# That previously broke `/` by redirecting it to `/ar/`. The Astro site already
+# serves English at `/` and Arabic at `/ar/` via dedicated routes, so no
+# backward-compat redirect is needed for the legacy Flutter `?lang=` form.
